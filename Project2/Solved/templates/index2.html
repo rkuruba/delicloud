@@ -13,7 +13,16 @@
     </style>
 </head>
 <body>
-
+<div class="container text-center">
+    <h1 class="jumbotron">Cloud Orders</h1>
+    <div>
+      <ul style="list-style: none;">
+        {% for product in productlist %}
+          <li>{{ product.AddedToHoststand}}:{{ product.SKU }}:{{ product.VPCRegion}}</li>
+        {% endfor %}
+      </ul>
+    </div>
+</div>
 <div class="container">
 <script type="text/javascript" src="header.js"></script>
   <div id="chart-ring-year" style="width:300px; height:330px">
@@ -63,13 +72,13 @@ var table = new dc.DataTable('#table');
 
 // use static or load via d3.csv("spendData.csv").then(function(spendData) {/* do stuff */});
 var spendData = [
-    {Name: 'Mr A', Spent: '$40', Year: 2011},
-    {Name: 'Mr B', Spent: '$10', Year: 2011},
-    {Name: 'Mr C', Spent: '$40', Year: 2011},
-    {Name: 'Mr A', Spent: '$70', Year: 2012},
-    {Name: 'Mr B', Spent: '$20', Year: 2012},
-    {Name: 'Mr B', Spent: '$50', Year: 2013},
-    {Name: 'Mr C', Spent: '$30', Year: 2013}
+    {Name: 'Jan', Spent: '$40', Year: 'us-east-1'},
+    {Name: 'Feb', Spent: '$10', Year: 'us-east-1'},
+    {Name: 'Mar', Spent: '$40', Year: 'us-east-1'},
+    {Name: 'Jan', Spent: '$70', Year: 'ap-southeast-1'},
+    {Name: 'Feb', Spent: '$20', Year: 'ap-southeast-1'},
+    {Name: 'Feb', Spent: '$50', Year: 'us-gov-east-1'},
+    {Name: 'Mar', Spent: '$30', Year: 'us-gov-east-1'}
 ];
 
 // normalize/parse data
@@ -79,7 +88,7 @@ spendData.forEach(function(d) {
 
 // set crossfilter
 var ndx = crossfilter(spendData),
-    yearDim  = ndx.dimension(function(d) {return +d.Year;}),
+    yearDim  = ndx.dimension(function(d) {return d.Year;}),
     spendDim = ndx.dimension(function(d) {return Math.floor(d.Spent/10);}),
     nameDim  = ndx.dimension(function(d) {return d.Name;}),
     spendPerYear = yearDim.group().reduceSum(function(d) {return +d.Spent;}),
@@ -120,7 +129,7 @@ table
               {
                   label: 'Spent',
                   format: function(d) {
-                      return '$' + d.Spent;
+                      return d.Spent;
                   }
               },
               'Year',
