@@ -52,7 +52,6 @@
     </div>
   </div>
 
-
 <!--<script type="text/javascript" src="../js/d3.js"></script>
 <script type="text/javascript" src="../js/crossfilter.js"></script>
 <script type="text/javascript" src="../js/dc.js"></script>
@@ -69,21 +68,30 @@ var yearRingChart   = new dc.PieChart("#chart-ring-year"),
     spenderRowChart = new dc.RowChart("#chart-row-spenders");
 
 var table = new dc.DataTable('#table');
+var i = 0;
+console.log(i);
+var someJavaScriptVarDate = '{{productlist[0].UpdatedAt}}';
+var someJavaScriptVarRegion = '{{productlist[0].VPCRegion}}';
+console.log('{{productlist|length}}')
+console.log(someJavaScriptVarDate);
+console.log(someJavaScriptVarRegion);
+var spendData = []
 
-console.log('{{productlist}}'.length);
-var someJavaScriptVar = '{{productlist}}';
-  //spendData.push({Name: '{{productlist'[i].SKU+'}}', Spent: '$40', Year: 'us-east-1'})
-//for(i=0; i < '{{productlist}}'.length; i++)
-//{
- // console.log(i);
-//}
+{% for product in productlist %} 
 
-// use static or load via d3.csv("spendData.csv").then(function(spendData) {/* do stuff */});
+console.log('{{product}}');
+var spendDataRecord = {Name: '{{product.UpdatedAt}}', Spent: '{{product.SKU}}', Year: '{{product.VPCRegion}}'}
+console.log(spendDataRecord);
+spendData.push(spendDataRecord);
+{%endfor%}
+console.log(spendData);
+
+
 var spendData = [
-    {Name: 'Jan', Spent: '$40', Year: 'us-east-1'},
+    {Name: someJavaScriptVarDate, Spent: '$40', Year: 'us-east-1'},
     {Name: 'Feb', Spent: '$10', Year: 'us-east-1'},
     {Name: 'Mar', Spent: '$40', Year: 'us-east-1'},
-    {Name: 'Jan', Spent: '$70', Year: 'ap-southeast-1'},
+    {Name: someJavaScriptVarDate, Spent: '$70', Year: 'ap-southeast-1'},
     {Name: 'Feb', Spent: '$20', Year: 'ap-southeast-1'},
     {Name: 'Feb', Spent: '$50', Year: 'us-gov-east-1'},
     {Name: 'Mar', Spent: '$30', Year: 'us-gov-east-1'}
