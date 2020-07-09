@@ -1,8 +1,6 @@
-from flask import Flask, render_template, Response, jsonify
-
-
 # Import our pymongo library, which lets us connect our Flask app to our Mongo database.
 import pymongo
+from flask import Flask, render_template
 
 # Create an instance of our Flask app.
 app = Flask(__name__)
@@ -31,24 +29,14 @@ def index():
     # Return the template with the teams list passed in
     return render_template('index.html', productlist=productlist)
 
-# Set route for table
-@app.route('/index3.html')
-def index3():
+@app.route('/map')
+def map():
     # Store the entire team collection in a list
-    productlist3 = list(db.products.find())
-    print(productlist3)
+    productlist = list(db.products.find())
+    print(productlist)
 
     # Return the template with the teams list passed in
-    return render_template('index3.html', productlist3=productlist3)
-
-@app.route('/jsonData',methods=["GET","POST"])
-def jsonData():
-    # Store the entire team collection in a list
-    productlist3 = list(db.products.find())
-    response = Response(response=productlist3, status=200, mimetype="application/json")
-
-    # Return the template with the teams list passed in
-    return jsonify(response)
+    return render_template('index2.html', productlist=productlist)
 
 if __name__ == "__main__":
     app.run(debug=True)
