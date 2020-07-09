@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>dc.js - Downloading Data Table Contents</title>
+    <title>Delicloud - Visualization of cloud orders delivered</title>
     <meta charset="UTF-8">
     <!-- CSS only -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
@@ -15,40 +15,47 @@
     </style>
 </head>
 <body>
-<div class="container text-center">
-    <h1 class="jumbotron">Cloud Orders</h1>
-    <div>
-      <table class="table">
+ <div class="container text-center">
+    <h1 class="jumbotron">DELICLOUD</h1>
+
+    <div style = "margin: 0; overflow: hidden; background-color: #333; font-family: Arial; text-decoration: none; font-size: 16px; padding: 14px 16px">
+      <a href="/map">View Map</a>
+      <a style = "padding-left: 20px" href="/data">View Data</a> 
+    </div>
+
+
+      <!-- <table class="table"> -->
       <!-- ul style="list-style: none;"-->
-      {% for product in productlist %}
+      <!-- {% for product in productlist %}
       <tbody>
       <tr>
           <ld>{{ product.AddedToHoststand}}</ld><ld>{{ product.SKU }}</ld><ld>{{ product.VPCRegion}}</ld>
         {% endfor %}
       </tr>
       <!-- </ul> -->
-     </tbody>
+     <!-- </tbody>
     </table>
     </div>
-</div>
+</div> --> 
 <div class="container">
-  <div id="chart-ring-year" style="width:300px; height:330px">
+  <div id="chart-ring-region" style="width:300px; height:330px">
     <div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
-      <a href="javascript:yearRingChart.filterAll();dc.redrawAll();">reset</a>
+      <a href="javascript:regionRingChart.filterAll();dc.redrawAll();">reset</a>
     </div>
   </div>
-  <div id="chart-hist-spend" style="width:300px; height:330px">
+  <!-- <div id="chart-hist-spend" style="width:300px; height:330px">
     <div class="reset" style="visibility: hidden;">range: <span class="filter"></span>
       <a href="javascript:spendHistChart.filterAll();dc.redrawAll();">reset</a>
     </div>
-  </div>
-  <div id="chart-row-spenders">
+  </div> -->
+  <center><p>Total $ Spent</p></center>
+  <div id="chart-row-spenders" style="width:600px; height:330px; float: left">
     <div class="reset" style="visibility: hidden;">selected: <span class="filter"></span>
       <a href="javascript:spenderRowChart.filterAll();dc.redrawAll();">reset</a>
     </div>
   </div>
   <!-- not sure why all these styles necessary, not the point of this -->
-  <div style="clear: both; margin: 30px; float: left">
+  <div style="clear: both; margin: 30px; padding:20px"></div>
     <div id="table"></div>
     <div id="download-type" style="clear: both; float: left">
       <div><label><input type=radio name="operation" value="raw" checked="true">&nbsp;all data</label></div>
@@ -71,39 +78,37 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
 <script type="text/javascript">
 
-var yearRingChart   = new dc.PieChart("#chart-ring-year"),
-    spendHistChart  = new dc.BarChart("#chart-hist-spend"),
+var regionRingChart   = new dc.PieChart("#chart-ring-region"),
+   // spendHistChart  = new dc.BarChart("#chart-hist-spend"),
     spenderRowChart = new dc.RowChart("#chart-row-spenders");
 
 var table = new dc.DataTable('#table');
 var i = 0;
 console.log(i);
-var someJavaScriptVarDate = '{{productlist[0].UpdatedAt}}';
+var someJavaScriptVarDate = '{{productlist[0].AddedToHS}}';
 var someJavaScriptVarRegion = '{{productlist[0].VPCRegion}}';
 console.log('{{productlist|length}}')
 console.log(someJavaScriptVarDate);
 console.log(someJavaScriptVarRegion);
 var spendData = []
 
+var now = new Date('{{productlist[0].AddedToHS}}');
+var dateString = moment(now).format('MMM');
+console.log(dateString);
+
 {% for product in productlist %} 
 
 console.log('{{product}}');
-var spendDataRecord = {Name: '{{product.UpdatedAt}}', Spent: '{{product.SKU}}', Year: '{{product.VPCRegion}}'}
+
+var now = new Date('{{product.AddedToHS}}');
+var dateString = moment(now).format('MMM');
+console.log(dateString);
+var spendDataRecord = {ID: '{{product.ID}}', Month: dateString, Spent: '$'+'{{product.Spent}}', Region: '{{product.VPCRegion}}'}
 console.log(spendDataRecord);
 spendData.push(spendDataRecord);
+
 {%endfor%}
 console.log(spendData);
-
-
-var spendData = [
-    {Name: someJavaScriptVarDate, Spent: '$40', Year: 'us-east-1'},
-    {Name: 'Feb', Spent: '$10', Year: 'us-east-1'},
-    {Name: 'Mar', Spent: '$40', Year: 'us-east-1'},
-    {Name: someJavaScriptVarDate, Spent: '$70', Year: 'ap-southeast-1'},
-    {Name: 'Feb', Spent: '$20', Year: 'ap-southeast-1'},
-    {Name: 'Feb', Spent: '$50', Year: 'us-gov-east-1'},
-    {Name: 'Mar', Spent: '$30', Year: 'us-gov-east-1'}
-];
 
 // normalize/parse data
 spendData.forEach(function(d) {
@@ -112,34 +117,34 @@ spendData.forEach(function(d) {
 
 // set crossfilter
 var ndx = crossfilter(spendData),
-    yearDim  = ndx.dimension(function(d) {return d.Year;}),
+    regionDim  = ndx.dimension(function(d) {return d.Region;}),
     spendDim = ndx.dimension(function(d) {return Math.floor(d.Spent/10);}),
-    nameDim  = ndx.dimension(function(d) {return d.Name;}),
-    spendPerYear = yearDim.group().reduceSum(function(d) {return +d.Spent;}),
-    spendPerName = nameDim.group().reduceSum(function(d) {return +d.Spent;}),
+    monthDim  = ndx.dimension(function(d) {return d.Month;}),
+    spendPerRegion = regionDim.group().reduceSum(function(d) {return +d.Spent;}),
+    spendPerMonth = monthDim.group().reduceSum(function(d) {return +d.Spent;}),
     spendHist    = spendDim.group().reduceCount();
 
-  yearRingChart
+  regionRingChart
     .width(300)
     .height(300)
-    .dimension(yearDim)
-    .group(spendPerYear)
+    .dimension(regionDim)
+    .group(spendPerRegion)
     .innerRadius(50)
     .controlsUseVisibility(true);
 
-  spendHistChart
-    .dimension(spendDim)
-    .group(spendHist)
-    .x(d3.scaleLinear().domain([0,10]))
-    .elasticY(true)
-    .controlsUseVisibility(true);
+//   spendHistChart
+//     .dimension(spendDim)
+//     .group(spendHist)
+//     .x(d3.scaleLinear().domain([300,3000]))
+//     .elasticY(true)
+//     .controlsUseVisibility(true);
 
-spendHistChart.xAxis().tickFormat(function(d) {return d*10}); // convert back to base unit
-spendHistChart.yAxis().ticks(2);
+// spendHistChart.xAxis().tickFormat(function(d) {return d*3000}); // convert back to base unit
+// spendHistChart.yAxis().ticks(2);
 
 spenderRowChart
-    .dimension(nameDim)
-    .group(spendPerName)
+    .dimension(monthDim)
+    .group(spendPerMonth)
     .elasticX(true)
     .controlsUseVisibility(true);
 
@@ -149,14 +154,16 @@ table
     .dimension(spendDim)
     .sortBy(function(d) { return +d.Spent; })
     .showSections(false)
-    .columns(['Name',
+    .columns(['ID',
+              'Month',
+              '  ',
               {
                   label: 'Spent',
                   format: function(d) {
-                      return d.Spent;
+                      return '$' + d.Spent;
                   }
               },
-              'Year',
+              'Region',
               {
                   label: 'Percent of Total',
                   format: function(d) {
@@ -166,7 +173,7 @@ table
 
 d3.select('#download')
     .on('click', function() {
-        var data = nameDim.top(Infinity);
+        var data = monthDim.top(Infinity);
         if(d3.select('#download-type input:checked').node().value==='table') {
             data = data.sort(function(a, b) {
                 return table.order()(table.sortBy()(a), table.sortBy()(b));
